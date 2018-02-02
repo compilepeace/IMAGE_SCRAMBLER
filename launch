@@ -1,0 +1,133 @@
+#!/bin/bash
+
+
+# Function that returns 0 if the password is correct
+authenticate()
+{
+	if [[ "$1" == "Abhinav" ]]; then
+		return 0
+	
+	else
+		echo "Wrong password. "
+		exit
+	fi
+}
+
+
+# displays the proper menu 
+menu()
+{
+echo ""
+echo "=-=-=-=-=- WELCOME =-=-=-=-=-"
+echo "1. Encrypt"
+echo "2. Decrypt"
+echo ""
+}
+
+
+# function to encrypt/decrypt data
+encrypt_decrypt()
+{	
+		# for a directory
+		if [[ -d $1 ]]; then
+			echo "\nA directory\n"
+			# call appropriate script for each file in the directory
+			for i in $(ls $1); do
+				
+				# run encrypt.py
+				if [[ "$2" == "1" ]]; then
+					echo "Encrypting $i"
+					$(xxd $1/$i > $1/newfile)
+					$(rm $1/$i)
+					$(mv $1/newfile $1/$i)
+					$(python encrypt.py "$1/$i")
+					$(rm $1/$i)
+
+				# run decrypt.py
+				#elif (( "$2" == "2" && $i =~ [:punct:]|[:alnum:].encrypt$ )); then 
+				elif [[ "$2" == "2" ]]; then
+					echo "Decrypting $i"
+					$(python decrypt.py "$1/$i")
+					$(rm $1/$i)
+					decrypt_flag=1
+
+				else
+					echo "Wrong choice ! "
+					exit
+				fi
+
+			done
+
+
+		# for a file
+		elif [[ -r $1 ]]; then
+			echo "\nA file\n"
+
+			# move to the location
+			cd $1
+			
+			# call encrypt.py for the file
+			if [[ "$2" == "1" ]]; then
+				echo "Encrypting $1"
+				$(xxd $1 > $1/newfile)
+				$(rm $1)
+				$(mv $1/newfile $(basename $1))
+				$(python encrypt.py "$1")
+				$(rm $1)
+			
+			#elif [[ "$2" == "2" && $i =~ *.encrypt$ ]]; then
+			elif [[ "$2" == "2" ]]; then
+				echo "Decrypting $1"
+				$(python decrypt.py "$1")
+				$(rm $1)
+				decrypt_flag=1
+
+			else
+				echo "Wrong choice ! "
+				exit
+			fi
+		fi		
+
+
+		if (( decrypt_flag == 1 )); then
+			xxd_reverse $1					# pass location as argument parameter
+		fi
+
+	echo "Done."
+}
+
+
+# After running decrypt.py, we need to reverse obfuscate with "xxd -r" command
+xxd_reverse()
+{
+	for i in $(ls $location); do
+		$(xxd -r $location/$i > $location/newfile)
+		$(rm $location/$i)
+		$(mv $location/newfile $location/$i)
+	done	
+}
+
+
+decrypt_flag=0
+tool_location=$(pwd)
+
+# Entry point
+read -p "Enter your password -> " password
+
+# Authenticate the password
+authenticate $password
+
+# display the menu
+menu
+
+# take the required location and choice weather to encrypt or decrypt the data
+read -p "Enter your choice (1/2) -> " choice
+read -p "Enter the location -> " location
+
+
+echo "\nlocation : $location"
+echo "choice : $choice\n"
+
+
+encrypt_decrypt $location $choice
+
