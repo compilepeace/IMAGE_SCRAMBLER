@@ -11,8 +11,8 @@
     values of the hexdump recieved. Main is written in BASH scripts which calls encrypt.py as well as decrypt.py
     according to what the user's needs are.
     
-    Righ now, it is made such that given the path of the directory, it will encrypt all the files in that directory
-    but will not encrypt if path to a particular file is given rather than a directory.
+    Righ now, it is made such that given the path of the directory, it will encrypt all the files in that 
+    directory but will not encrypt if path to a particular file is given rather than a directory.
     
     Any suggestions and contributions will be appreciated.
     
